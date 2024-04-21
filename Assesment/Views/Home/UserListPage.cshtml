@@ -1,0 +1,374 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<style>
+    .page-item:hover {
+        cursor:pointer;
+    }
+
+    .btnstyle:hover{
+        cursor: pointer;
+        color: #0d6efd;
+    }
+
+    .selected{
+        font-weight: 800;
+        color: #024dbc;
+    }
+</style>
+
+<section class="vh-100" style="background-color: none;">
+    <div class="container h-50">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-lg-12 col-xl-11">
+                <div class="text-black" style="border-radius: 25px;">
+                    <div class="card-body p-md-5">
+                        <div class="row" style="font-size:20px;padding-bottom:10px;">
+                            <div class="col-lg-3 col-xl-11">
+                                <b class="btnstyle" id="btn-back">< Back</b>
+                             </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <table class="table table-bordered" id="user-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Mail</th>
+                                        <th scope="col">Phone Number</th>
+                                        <th scope="col">Hobby</th>
+                                        <th scope="col">Skill Sets</th>
+                                        <th scope="col">Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row" style="float:right;">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="row" style="float:left;" id="SizeNumber">
+                            <nav aria-label="Size number navigation">
+                                <ul class="pagination">
+                                    <li class="page-item size-number"><a class="page-link">3</a></li>
+                                    <li class="page-item size-number"><a class="page-link">5</a></li>
+                                    <li class="page-item size-number"><a class="page-link">10</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal" tabindex="-1" role="dialog" id="editModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Form</h5>
+            </div>
+            <div class="modal-body">
+                <form class="mx-1 mx-md-4">
+                    <div class="d-flex flex-row align-items-center mb-4">
+                        <i class="fas fa-user fa-lg me-3 fa-fw"></i>
+                        <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                            <label class="form-label" for="user-name">Name</label>
+                            <input type="text" id="user-name" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row align-items-center mb-4">
+                        <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
+                        <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                            <label class="form-label" for="user-email">Email</label>
+                            <input type="email" id="user-email" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row align-items-center mb-4">
+                        <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
+                        <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                            <label class="form-label" for="user-phone-number">Phone Number</label>
+                            <input type="text" id="user-phone-number" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row align-items-center mb-4">
+                        <i class="fas fa-key fa-lg me-3 fa-fw"></i>
+                        <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                            <label class="form-label" for="user-hobby">Hobby</label>
+                            <input type="text" id="user-hobby" class="form-control" placeholder="Ex. jogging, cooking..." />
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row align-items-center mb-4">
+                        <i class="fas fa-key fa-lg me-3 fa-fw"></i>
+                        <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                            <label class="form-label" for="user-skillset">Skill Sets</label>
+                            <input type="text" id="user-skillset" class="form-control" placeholder="Ex. time management, problem solving..." />
+                        </div>
+                    </div>
+
+                    <div style="color:orange;" id="warningMessage">
+                    </div>
+
+                    <div style="color:lightgreen;" id="successMessage">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-save" itemid="">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btn-close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var page_number = 1;
+    var page_size = 5;
+
+    function SelectUserList() {
+        $.ajax({
+            type: 'GET',
+            url: '/api/User/SelectUserList/' + page_number + '/' + page_size,
+            contentType: 'application/json; charset=utf-8',
+            success: function (result) {
+                console.log(result);
+                if (result.ReturnCode == 200) {
+                    var table_body = $('#user-table > tbody');
+                    table_body.html('');
+                    $.each(result.Results, function (i, k) {
+                        table_body.append('<tr><td>' + k.UserName + '</td><td>' + k.Mail + '</td><td>' 
+                            + k.PhoneNumber + '</td><td>' + k.Hobby + '</td><td>' + k.SkillSets + '</td><td><span class="btnstyle btn-edit" itemid="' 
+                            + k.UserID + '">edit</span>&nbsp&nbsp<span class="btnstyle btn-delete" itemid="' + k.UserID + '">delete</span></td></tr>');
+                    });
+                    var total_items = result.Results[0].TotalCount;
+                    var total_pages = total_items == 0 ? 0 : (total_items - 1) / page_size + 1;
+                    var pagenav = $('#user-table').parent().next().find('ul.pagination');
+                    pagenav.html('');
+                    if (total_pages > 1) {
+                        var is_next_page = total_pages - page_number;
+                        if (page_number != 1) {
+                            pagenav.append('<li class="page-item" id="prev-page"><a class="btnstyle page-link"><</a></li>');
+                        }
+
+                        if (is_next_page > 1) {
+                            pagenav.append('<li class="page-item" id="next-page"><a class="btnstyle page-link">></a></li>');
+                        } 
+                    }
+
+                    $('#SizeNumber').find('a:contains("' + page_size + '")').parent().addClass('selected');
+                } else {
+                    console.log(result.ReturnMessage);
+                }
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+    }
+
+    function PopulateData(item, item_id) {
+        $('#btn-save').attr('itemid', item_id);
+
+        if (item.UserName != '') {
+            $('input#user-name').val(item.UserName);
+        }
+
+        if (item.Mail != '') {
+            $('input#user-email').val(item.Mail);
+        }
+
+        if (item.Mail != '') {
+            $('input#user-phone-number').val(item.PhoneNumber);
+        }
+
+        if (item.Hobby != '' && item.Hobby != null) {
+            $('input#user-hobby').val(item.Hobby.join());
+        }
+
+        if (item.SkillSets != '' && item.SkillSets != null) {
+            $('input#user-skillset').val(item.SkillSets.join());
+        }
+    }
+
+    function ClearForm(){
+        $('input#user-name').val('');
+        $('input#user-email').val('');
+        $('input#user-phone-number').val('');
+        $('input#user-hobby').val('');
+        $('input#user-skillset').val('');
+        $('#btn-save').attr('itemid', '');
+    }
+
+    function SelectUserById(userid) {
+        $.ajax({
+            type: 'GET',
+            url: '/api/User/SelectUserById/' + userid,
+            contentType: 'application/json; charset=utf-8',
+            success: function (result) {
+                console.log(result);
+                if (result.ReturnCode == 200) {
+                    PopulateData(result.Results[0], userid);
+                } else {
+                    console.log(result.ReturnMessage);
+                }
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+    }
+
+    function UpdateUserDetails(userid) {
+        var name = $('#user-name');
+        var email = $('#user-email');
+        var phone_number = $('#user-phone-number');
+        var hobbies = $('#user-hobby');
+        var skillsets = $('#user-skillset');
+
+        if (name.val() == '') {
+            name.focus();
+            showErrMessage('Name is required');
+            return false;
+        }
+
+        if (email.val() == '') {
+            email.focus();
+            showErrMessage('Email is required');
+            return false;
+        }
+
+        if (phone_number.val() == '') {
+            phone_number.focus();
+            showErrMessage('Phone number is required');
+            return false;
+        }
+
+        var arr_skill_sets = [];
+        if (skillsets.val() != null && skillsets.val() != '') {
+            arr_skill_sets = skillsets.val().split(',');
+        }
+
+        var arr_hobbies = [];
+        if (hobbies.val() != null && hobbies.val() != '') {
+            arr_hobbies = hobbies.val().split(',');
+        }
+
+        var obj = {
+            UserName: name.val(),
+            Mail: email.val(),
+            PhoneNumber: phone_number.val(),
+            SkillSets: arr_skill_sets,
+            Hobby: arr_hobbies
+        }
+
+        var params = JSON.stringify(obj);
+
+        $.ajax({
+            type: 'PUT',
+            dataType: 'json',
+            url: '/api/User/UpdateUserDetails/' + userid,
+            data: params,
+            contentType: 'application/json; charset=utf-8',
+            success: function (result) {
+                console.log(result);
+                if (result.ReturnCode == 200) {
+                    $('#btn-close-modal').click();
+                    SelectUserList();
+                } else {
+                    showErrMessage(result.ReturnMessage);
+                }
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+    }
+
+    function DeleteUser(userid) {
+        $.ajax({
+            type: 'DELETE',
+            url: '/api/User/DeleteUser/' + userid,
+            contentType: 'application/json; charset=utf-8',
+            success: function (result) {
+                console.log(result);
+                if (result.ReturnCode == 200) {
+                    SelectUserList();
+                } else {
+                    console.log(result.ReturnMessage);
+                }
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+    }
+
+    function showErrMessage(err_msg) {
+        $('#warningMessage').html('<b>' + err_msg + '</b>');
+        $('#warningMessage').show();
+    }
+
+    $(document).ready(function(){
+        SelectUserList();
+
+        $(document).on('click', '#prev-page', function () {
+            page_number = page_number - 1;
+            SelectUserList();
+        });
+
+        $(document).on('click', '#next-page', function () {
+            page_number = page_number + 1;
+            SelectUserList();
+        });
+
+        $(document).on('click', '.size-number', function () {
+            var _this = $(this);
+            var selected_size_number = parseInt(_this.find('a').text());
+            if (page_size != selected_size_number) {
+                $('#SizeNumber').find('a:contains("' + page_size + '")').parent().removeClass('selected');
+                page_size = selected_size_number;
+                page_number = 1;
+                SelectUserList();
+            }
+        });
+
+        $(document).on('click', '.btn-edit', function () {
+            var this_id = $(this).attr('itemid');
+            $('#warningMessage').hide();
+            $('#successMessage').hide();
+            $('#editModal').modal('show');
+            SelectUserById(this_id);
+        });
+
+        $(document).on('click', '#btn-close-modal', function () {
+            $('#editModal').modal('hide');
+            ClearForm();
+        });
+
+        $(document).on('click', '#btn-save', function () {
+            var _save_item_id = $(this).attr('itemid');
+            UpdateUserDetails(_save_item_id);
+        });
+
+        $(document).on('click', '.btn-delete', function () {
+            var _delete_item_id = $(this).attr('itemid');
+            DeleteUser(_delete_item_id);
+        });
+
+        $(document).on('click', '#btn-back', function () {
+            window.location.href = '/Home/Index';
+        });
+    });
+</script>
+

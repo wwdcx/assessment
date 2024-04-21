@@ -1,0 +1,34 @@
+2024-04-22 00:41:32.3359|0|ERROR|AssesmentProject.Controllers.UserController|Query: 
+                SELECT *, @pagenum as pageNum
+                FROM(
+                	SELECT u.user_d, u.username, u.mail, u.phone_number, (
+                			SELECT STRING_AGG(hobby, ', ') 
+                			FROM dbo.users_hobby
+                			WHERE user_id = u.user_id	
+                		)as hobby, (
+                			SELECT STRING_AGG(sillset, ', ') 
+                			FROM dbo.users_skillsets
+                			WHERE user_id = u.user_id	
+                		)as skillsets, ROW_NUMBER() OVER(ORDER BY u.username)as rowNum, COUNT(*) OVER(PARTITION BY NULL) as TotalCount
+                	FROM dbo.users u
+                )a
+                WHERE rowNum > ((@pagenum - 1) * @pagesize) 
+                AND rowNum <= (@pagenum * @pagesize)
+            Parameters: [{"ParameterName":"@pagenum","ParameterValue":1},{"ParameterName":"@pagesize","ParameterValue":5}]Error: Invalid column name 'user_d'. 
+2024-04-22 00:42:02.6814|0|ERROR|AssesmentProject.Controllers.UserController|Query: 
+                SELECT *, @pagenum as pageNum
+                FROM(
+                	SELECT u.user_d, u.username, u.mail, u.phone_number, (
+                			SELECT STRING_AGG(hobby, ', ') 
+                			FROM dbo.users_hobby
+                			WHERE user_id = u.user_id	
+                		)as hobby, (
+                			SELECT STRING_AGG(sillset, ', ') 
+                			FROM dbo.users_skillsets
+                			WHERE user_id = u.user_id	
+                		)as skillsets, ROW_NUMBER() OVER(ORDER BY u.username)as rowNum, COUNT(*) OVER(PARTITION BY NULL) as TotalCount
+                	FROM dbo.users u
+                )a
+                WHERE rowNum > ((@pagenum - 1) * @pagesize) 
+                AND rowNum <= (@pagenum * @pagesize)
+            Parameters: [{"ParameterName":"@pagenum","ParameterValue":1},{"ParameterName":"@pagesize","ParameterValue":5}]Error: Invalid column name 'user_d'. 
